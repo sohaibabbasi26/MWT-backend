@@ -9,7 +9,6 @@ const handleFirstVideoUpload = async (request, response) => {
     try {
         const parts = request.parts();
         let listing_id = null;
-        
 
         for await (const part of parts) {
             if (part.file) {
@@ -33,8 +32,6 @@ const handleFirstVideoUpload = async (request, response) => {
             }
         }
 
-
-
         if (!listing_id || !tempFilePath) {
             return response.status(400).send({
                 status: 400,
@@ -42,7 +39,7 @@ const handleFirstVideoUpload = async (request, response) => {
                 listing: null
             });
         } else {
-            const resultFromCloudinaryAndDb = await services.uploadFirstVideoService(tempFilePath);
+            const resultFromCloudinaryAndDb = await services.uploadFirstVideoService(tempFilePath, listing_id);
             return response.status(200).send({
                 status: resultFromCloudinaryAndDb.status,
                 message: resultFromCloudinaryAndDb.message,
@@ -64,10 +61,10 @@ const handleFirstVideoUpload = async (request, response) => {
 
 const createListingHandler = async (request, response) => {
     try {
-        const { location } = request.body;
-        const result = await Listing.create({ location });
+        const { data } = request.body;
+        const result = await Listing.create(data);
         response.status(200).send({
-            status: 500,
+            status: 200,
             message: "Successful",
             listing: result
         })
@@ -82,7 +79,49 @@ const createListingHandler = async (request, response) => {
     }
 }
 
+const updateListing = async (request,response) => {
+    try {
+        const {listing_id, data} = request.body;
+        const result =  await services.updateListingService(listing_id, data);
+        response.status(200).send({
+            status: result.status,
+            message: result.message,
+            result: result.result
+        });
+    } catch (err) {
+        console.log("[ERROR]:",err);
+        response.status(500).send({
+            status: 500,
+            message: "Internal Sever Error",
+            result: null
+        });
+    }
+}
+
+const getListing = async (request,response) => {
+    try {
+        const { listing_id } = request.params;
+        console.log("[listing id]:",listing_id);
+        const result = await services.getListingService({listing_id});
+        response.status(result.status).send({
+            status: result.status,
+            message: result.message,
+            data: result.data
+        });
+        
+    } catch (err) {
+        console.log("[ERROR]:",err);
+        response.status(500).send({
+            status: 500,
+            message: "Internal Server Error",
+            data: null
+        })
+    }
+}
+
 module.exports = {
     handleFirstVideoUpload,
-    createListingHandler
+    createListingHandler,
+    updateListing,
+    getListing
 }

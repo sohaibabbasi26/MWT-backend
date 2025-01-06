@@ -11,6 +11,16 @@ const routes = [
         method: 'POST',
         url: '/create-listing',
         handler: uploadsHandlers.createListingHandler
+    },
+    {
+        method: 'POST',
+        url: '/update-listing',
+        handler: uploadsHandlers.updateListing
+    },
+    {
+        method: 'GET',
+        url:'/get-listing/:listing_id',
+        handler: uploadsHandlers.getListing
     }
     // {
     //     method:'POST',
