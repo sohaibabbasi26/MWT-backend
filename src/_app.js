@@ -12,7 +12,7 @@ const { connectRabbitMQ } = require('../configurations/rabbitMQgateway');
 const Listing = require('../src/models/listing');
 
 fastify.register(cors, { 
-    origin: process.env.ALLOWED_CLIENT
+    origin: "*"
 });
 
 fastify.register(require("@fastify/multipart"));
