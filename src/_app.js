@@ -23,15 +23,7 @@ const serverInit = async () => {
         fastify.route(route);
     });
 
-    // uploadRoutes.forEach((route) => {
-    //     fastify.route(route);
-    // })
-
-    
     syncModels();
-
-    // const jwtSecret = generateJwtSecret();
-    // console.log("Generated JWT secret:", jwtSecret);
 
     fastify.listen({ port: process.env.SERVER_PORT, host: process.env.SERVER_HOST}, function (err, address) {
         if (err) {
@@ -39,8 +31,6 @@ const serverInit = async () => {
             process.exit(1)
         }
     });
-    // socketIOConnection();
-    // await connectRabbitMQ();
 }
 
 module.exports = {

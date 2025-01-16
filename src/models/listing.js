@@ -8,11 +8,17 @@ const Listing = sequelize.define('listings', {
         allowNull: false,
         primaryKey: true
     },
+    description: {
+        type: DataTypes.TEXT('medium'),
+    },
     location: {
         type: DataTypes.STRING,
     },
     visitors: {
         type: DataTypes.INTEGER,
+    },
+    views: {
+        type: DataTypes.INTEGER
     },
     listing_engagements: {
         type: DataTypes.INTEGER
@@ -43,7 +49,14 @@ const Listing = sequelize.define('listings', {
     },
     yt_link: {
         type: DataTypes.STRING
-    }
-})
+    },
+    uploaded_images: {
+        type: DataTypes.JSONB
+    },
+    // page_link: {
+    //     type: DataTypes.STRING,
+    //     defaultValue: null
+    // }
+});
 
 module.exports = Listing;

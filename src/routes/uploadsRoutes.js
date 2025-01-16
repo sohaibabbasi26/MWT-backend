@@ -3,11 +3,16 @@ const uploadsHandlers = require('../handlers/uploadsHandler');
 
 const routes = [
     {
-        method: 'POST',
+        method: 'PUT',
         url: '/upload-first-video',
         handler: uploadsHandlers.handleFirstVideoUpload
     },
     {
+        method: 'PUT',
+        url: '/upload-second-video',
+        handler: uploadsHandlers.handleSecondVideoUpload
+    },
+    {   
         method: 'POST',
         url: '/create-listing',
         handler: uploadsHandlers.createListingHandler
@@ -21,19 +26,27 @@ const routes = [
         method: 'GET',
         url:'/get-listing/:listing_id',
         handler: uploadsHandlers.getListing
-    }
+    },
+    {
+        method: 'POST',
+        url: '/post-listing-images',
+        handler: uploadsHandlers.postListingImagesHandler
+    },
+    {
+        method: "PUT",
+        url:"/edit-listing",
+        handler: uploadsHandlers.updateListing
+    },
+    {
+        method: "GET",
+        url: "/get-all-listings",
+        handler: uploadsHandlers.getAllListings
+    },
     // {
-    //     method:'POST',
-    //     url:'/upload-second-video',
-    //     handler: uploadsHandlers.signup,
-    //     // preHandler: authValidation.validateRegister
-    // },
-    // {
-    //     method:'POST',
-    //     url:'/login',
-    //     handler:uploadsHandlers.login,
-    //     // preHandler:authValidation.validateLogin
-    // },
+    //     method: "PUT",
+    //     url: "/edit-listing/:listing_id",
+    //     handler: uploadsHandlers
+    // }
 ];
 
 module.exports = {routes};

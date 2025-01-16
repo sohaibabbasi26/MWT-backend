@@ -5,7 +5,7 @@ services:
     volumes:
       - ./db:/var/lib/postgresql/data
     ports:
-      - "7779:5432"
+      - "5432:5432"
     networks:
       - dev-net
     environment:

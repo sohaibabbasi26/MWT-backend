@@ -13,10 +13,26 @@ const uploadVideo = async (filePath, folder = "MWT-files") => {
     return { status: 200, url: result.secure_url, public_id: result.public_id , message: "Successfully uploaded"};
   } catch (error) {
     console.error("Cloudinary upload error:", error);
-    return { status: 500, message: "Internal server error", url: null, public_id: null};
+    return { status: 500, message: "Internal server error",  url: null, public_id: null};
   }
 };
 
+const uploadImage = async (filePath, folder = "MWT-images") => {
+  try {
+    const result = await cloudinary.uploader.upload(filePath, {
+      resource_type: "image",
+      folder: folder, 
+    });
+    return {
+      success: true,
+      url: result.secure_url,
+      public_id: result.public_id,
+    };
+  } catch (error) {
+    console.error("Cloudinary upload error:", error);
+    return { success: false, error: error.message };
+  }
+};
 
 const getSingleVideo = async (public_id) => {
     try {
@@ -43,5 +59,6 @@ const getSingleVideo = async (public_id) => {
   
 module.exports = {
     uploadVideo,
-    getSingleVideo
+    getSingleVideo,
+    uploadImage
 }

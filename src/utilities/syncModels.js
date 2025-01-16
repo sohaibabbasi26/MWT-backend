@@ -4,7 +4,7 @@ sequelize.options.logging = console.log;
 
 async function syncModels() {
     try {
-        await sequelize.sync({ alter: true, force: true });
+        await sequelize.sync({ alter: true, force: false });
         console.log("All models were synchronized successfully.");
 
         sequelize.authenticate()
@@ -13,6 +13,7 @@ async function syncModels() {
 
     } catch (error) {
         console.error('Error syncing models:', error);
+        return;
     }
 }
 
