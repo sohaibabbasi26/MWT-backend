@@ -201,6 +201,7 @@ const getAllInstagramPostsService = async () => {
       data: data.data
     }
   } catch (err) {
+    console.log("[ERROR WHILE INSTAGRAM POSTS]:",err);
     return {
       status: 500,
       message: "Couldn't get the instagram posts",
