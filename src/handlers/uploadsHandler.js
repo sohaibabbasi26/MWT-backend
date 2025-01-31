@@ -5,6 +5,7 @@ const path = require('path');
 const fs = require('fs');
 const { uploadImage } = require("../utilities/cloudinaryHelper");
 
+
 const handleFirstVideoUpload = async (request, response) => {
     let tempFilePath = null;
     try {
@@ -124,6 +125,7 @@ const handleSecondVideoUpload = async (request, response) => {
 const createListingHandler = async (request, response) => {
     try {
         const data = request.body;
+        console.log("[BODY]:", data);
         const result = await Listing.create(data);
         response.status(200).send({
             status: 200,
@@ -144,6 +146,7 @@ const createListingHandler = async (request, response) => {
 const updateListing = async (request, response) => {
     try {
         const { listing_id, data } = request.body;
+        console.log("[BODY]:", data);
         const result = await services.updateListingService(listing_id, data);
         response.status(200).send({
             status: result.status,
@@ -269,6 +272,69 @@ const postListingImagesHandler = async (request, response) => {
     }
 }
 
+const getAllInstagramPosts = async (request, response) => {
+    try {
+        const result = await services.getAllInstagramPostsService();
+        return {
+            status: result?.status,
+            message: result?.message,
+            data: result?.data
+        }
+    } catch (err) {
+        console.log("[ERROR]:",err);
+        response.status(500).send({
+            status: 500,
+            message: "Couldn't get the instagram posts",
+            data: null
+        })
+    }
+}
+
+const updateAutoSocialEntities = async  (request, response) => {
+    try {
+        const { mediaIds, facebookPosts, listing_id } = request.body;
+        console.log("[LISTING ID]:",listing_id);
+        const result = await services.updateAutoSocialEntitiesService(mediaIds, facebookPosts, listing_id);
+        response.status(result?.status).send({
+            status: result.status,
+            message: result.message,
+            instaInsights: result.instaInsights,
+            fbInsights: result?.fbInsights,
+            totalViews: result?.totalViews,
+            totalEngagements: result?.totalEngagements,
+            totalInterestedBuyers: result?.totalInterestedBuyers,
+            updatedListingEntry:  result?.updatedListingEntry
+        });
+
+    } catch (err) {
+        console.log("[ERROR]:",err);
+        response.status(500).send({
+            status: 500,
+            message: "Couldn't update the automatic social entities",
+            data: null
+        })
+    }
+}
+
+const getFbPagePosts = async (request, response) => {
+    try {
+        const result = await services.getFbPagePostsService();
+        return {
+            status: result?.status,
+            message: result?.message,
+            posts: result?.posts
+        }
+    } catch (err) {
+        console.log("[ERROR]:",err);
+        response.status(500).send({
+            status: 500,
+            message: "Couldn't fetch all the posts.",
+            posts: null
+        })
+    }
+}
+// const 
+
 module.exports = {
     handleFirstVideoUpload,
     createListingHandler,
@@ -276,5 +342,11 @@ module.exports = {
     getListing,
     handleSecondVideoUpload,
     postListingImagesHandler,
-    getAllListings
+    getAllListings,
+    getAllInstagramPosts,
+    updateAutoSocialEntities,
+    getFbPagePosts
 }
+
+
+// https://graph.facebook.com/v21.0/261586003895564/posts?fields=id,message,created_time,insights.metric(post_impressions_unique)&access_token=EAATS2AmQq28BO4XnhqqcCFS51NACHMlDroVap3QV8bCvN5ZAOnd1aT5ayZCfBrkZC4IlO9O3nC7fZBQs6BlZCkwQQ3TQSYmnZCcBroa2ZA6ZBAGncOZBZBVMggOpJZBvz7DYuhbzjgInR5DavdYFqxtcmzX1xNFz6I0q1kmdjuleJTEvc5Guo9XEHBWTWbf40uqnha4ndc83GGThnexlMrbbIRE

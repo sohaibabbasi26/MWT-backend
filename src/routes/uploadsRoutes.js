@@ -1,4 +1,5 @@
 const uploadsHandlers = require('../handlers/uploadsHandler');
+const { getInstagramPostsInsights, getMediaIdFromUrl } = require('../utilities/getIntagramInsights');
 // const authValidation = require('../pre-handlers/authValidation');
 
 const routes = [
@@ -42,6 +43,26 @@ const routes = [
         url: "/get-all-listings",
         handler: uploadsHandlers.getAllListings
     },
+    {
+        method: "GET",
+        url: "/get-insta-post-insights",
+        handler: getMediaIdFromUrl
+    },
+    {
+        method: "GET",
+        url: "/get-all-insta-posts",
+        handler: uploadsHandlers.getAllInstagramPosts
+    },
+    {
+        method: "POST",
+        url: "/update-automatic-views",
+        handler: uploadsHandlers.updateAutoSocialEntities
+    },
+    {
+        method: "GET",
+        url: "/get-all-facebook-posts",
+        handler: uploadsHandlers.getFbPagePosts
+    }
     // {
     //     method: "PUT",
     //     url: "/edit-listing/:listing_id",

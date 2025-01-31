@@ -20,6 +20,18 @@ const Listing = sequelize.define('listings', {
     views: {
         type: DataTypes.INTEGER
     },
+    zillowViews: {
+        type: DataTypes.INTEGER,
+        allowNull: true
+    },
+    mlsViews: {
+        type: DataTypes.INTEGER,
+        allowNull: true
+    },
+    homesDotComViews: {
+        type: DataTypes.INTEGER,
+        allowNull: true
+    },
     listing_engagements: {
         type: DataTypes.INTEGER
     },
@@ -31,6 +43,10 @@ const Listing = sequelize.define('listings', {
     },
     features: {
         type: DataTypes.JSONB
+    },
+    address: {
+        type: DataTypes.STRING,
+        allowNull: true
     },
     socialCampaignsLinks: {
         type: DataTypes.JSONB
