@@ -194,11 +194,11 @@ const getAllInstagramPostsService = async () => {
       method: "GET"
     });
     const data = await response.json();
-    console.log("[DATA]:", data.data);
+    console.log("[DATA]:", data);
     return {
       status: 200,
       message: "Successfully fetched the instagram page's posts",
-      data: data.data
+      data: data?.data
     }
   } catch (err) {
     console.log("[ERROR WHILE INSTAGRAM POSTS]:",err);
@@ -237,6 +237,8 @@ const updateAutoSocialEntitiesService = async (mediaIds, facebookPosts, listing_
       totalEngagements += (insights.likes || 0) + (insights.comments || 0) + (insights.saved || 0);
       totalInterestedBuyers += insights.comments || 0; 
     });
+
+
 
     facebookPosts.forEach(({ insights, comments }) => {
       // console.log("[FB PARTICULAR POST INSIGHTS]:")
