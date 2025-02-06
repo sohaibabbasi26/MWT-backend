@@ -188,25 +188,56 @@ const getAllListingsService = async () => {
 }
 
 const getAllInstagramPostsService = async () => {
-  try {
+  // try {
 
-    const response = await fetch(`https://graph.facebook.com/v18.0/${process.env.META_INSTA_BUSINESS_ID}/media?&fields=id,caption,timestamp&access_token=${process.env.META_ACCESS_TOKEN}`, {
-      method: "GET"
-    });
-    const data = await response.json();
-    console.log("[DATA]:", data);
+  //   const response = await fetch(`https://graph.facebook.com/v18.0/${process.env.META_INSTA_BUSINESS_ID}/media?&fields=id,caption,timestamp&access_token=${process.env.META_ACCESS_TOKEN}`, {
+  //     method: "GET"
+  //   });
+  //   const data = await response.json();
+  //   console.log("[DATA]:", data);
+  //   return {
+  //     status: 200,
+  //     message: "Successfully fetched the instagram page's posts",
+  //     data: data?.data
+  //   }
+  // } catch (err) {
+  //   console.log("[ERROR WHILE INSTAGRAM POSTS]:",err);
+  //   return {
+  //     status: 500,
+  //     message: "Couldn't get the instagram posts",
+  //     data: null
+  //   }
+  // }
+  try {
+    let allPosts = [];
+    let nextPageUrl = `https://graph.facebook.com/v18.0/${process.env.META_INSTA_BUSINESS_ID}/media?fields=id,caption,timestamp&access_token=${process.env.META_ACCESS_TOKEN}`;
+
+    while (allPosts?.length < 200) {
+      const response = await fetch(nextPageUrl, { method: "GET" });
+      const data = await response.json();
+
+      console.log("[DATA]:",data);
+
+      if (data?.data?.length) {
+        allPosts.push(...data.data);  
+      }
+
+      nextPageUrl = data?.paging?.next || null;
+    }
+
+    console.log("[ALL POSTS]:", allPosts.length);
     return {
       status: 200,
-      message: "Successfully fetched the instagram page's posts",
-      data: data?.data
-    }
+      message: "Successfully fetched all Instagram posts",
+      data: allPosts
+    };
   } catch (err) {
-    console.log("[ERROR WHILE INSTAGRAM POSTS]:",err);
+    console.log("[ERROR WHILE FETCHING INSTAGRAM POSTS]:", err);
     return {
       status: 500,
-      message: "Couldn't get the instagram posts",
+      message: "Couldn't get the Instagram posts",
       data: null
-    }
+    };
   }
 }
 
@@ -363,31 +394,35 @@ const getFbPagePostsService = async () => {
       const PAGE_ACCESS_TOKEN = result?.data[0]?.access_token;
       console.log("[PAGE ACCESS TOKEN GENERATED]:", PAGE_ACCESS_TOKEN);
 
-      const postsResponse = await fetch(
-        `https://graph.facebook.com/v21.0/${process.env.META_PAGE_ID}/posts?fields=id,message,created_time,comments.summary(true).limit(0),shares&access_token=${PAGE_ACCESS_TOKEN}`,
-        { method: "GET" }
-    );
-      const postsData = await postsResponse.json();
+      let allPosts = [];
+      let nextPageUrl = `https://graph.facebook.com/v21.0/${process.env.META_PAGE_ID}/posts?fields=id,message,created_time,comments.summary(true).limit(0),shares&access_token=${PAGE_ACCESS_TOKEN}`;
+      // let i = 0;
+      // Handle pagination
+      while (allPosts.length < 200) {
+          const postsResponse = await fetch(nextPageUrl, { method: "GET" });
+          const postsData = await postsResponse.json();
 
-      if (!postsData?.data) {
-          return {
-              status: 500,
-              message: "Failed to fetch posts.",
-              posts: []
-          };
+          if (!postsData?.data) break; // Stop if no more data
+
+          // Fetch insights for each post
+          const postsWithInsights = await Promise.all(
+              postsData.data.map(async (post) => {
+                  const insights = await fetchPostInsights(post.id, PAGE_ACCESS_TOKEN);
+                  return { ...post, insights };
+              })
+          );
+
+          allPosts.push(...postsWithInsights); // Add to the final array
+
+          // Move to the next page if available
+          nextPageUrl = postsData?.paging?.next || null;
+          console.log(`[FETCHED ${allPosts.length} POSTS SO FAR]`);
       }
-
-      const postsWithInsights = await Promise.all(
-          postsData.data.map(async (post) => {
-              const insights = await fetchPostInsights(post.id, PAGE_ACCESS_TOKEN);
-              return { ...post, insights };
-          })
-      );
 
       return {
           status: 200,
           message: "Successfully fetched all posts with insights.",
-          posts: postsWithInsights
+          posts: allPosts
       };
   } catch (err) {
       console.log("[ERROR FETCHING FACEBOOK POSTS]:", err);

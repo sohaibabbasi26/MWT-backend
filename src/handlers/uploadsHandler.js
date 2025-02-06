@@ -8,7 +8,7 @@ const { uploadImage } = require("../utilities/cloudinaryHelper");
 
 const handleFirstVideoUpload = async (request, response) => {
     let tempFilePath = null;
-    try {
+    try {   
         const parts = request.parts();
         let listing_id = null;
 
