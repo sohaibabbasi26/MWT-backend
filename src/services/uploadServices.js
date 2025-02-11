@@ -104,6 +104,62 @@ const uploadSecondVideoService = async (filePath, listing_id) => {
   }
 };
 
+const uploadBrochureVideoService = async (filePath, listing_id) => {
+  try {
+    const check = await Listing.findOne({
+      where: {
+        listing_id: listing_id
+      }
+    });
+
+    if (check !== null) {
+
+      const result = await uploadVideo(filePath);
+      console.log("[UPLOADING TO CLOUDINARY RESULT]:", result);
+
+      let existingBrochure = check?.brochure || {};
+      const brochureData = {
+        images: [...(existingBrochure.images || [])],
+        imagesText: [...(existingBrochure.imagesText || [])],
+        video: result?.url
+      };
+
+      const updatedListingResult = await Listing.update(
+        {
+          brochure: brochureData
+        },
+        {
+          where: {
+            listing_id: listing_id,
+          },
+        }
+      );
+
+      console.log("[updated entity]:", updatedListingResult);
+      return {
+        status: result?.status,
+        message: result?.message,
+        result: updatedListingResult,
+      };
+    } else {
+      return {
+        status: 404,
+        message: "Listing was not found",
+        result: null,
+      };
+    }
+
+
+  } catch (err) {
+    console.log("[ERR]:", err);
+    return {
+      status: 500,
+      message: "Some interruption has occurred",
+      result: null,
+    };
+  }
+};
+
 const updateListingService = async (listing_id, data) => {
   try {
     const result = await Listing.update(data, {
@@ -188,26 +244,6 @@ const getAllListingsService = async () => {
 }
 
 const getAllInstagramPostsService = async () => {
-  // try {
-
-  //   const response = await fetch(`https://graph.facebook.com/v18.0/${process.env.META_INSTA_BUSINESS_ID}/media?&fields=id,caption,timestamp&access_token=${process.env.META_ACCESS_TOKEN}`, {
-  //     method: "GET"
-  //   });
-  //   const data = await response.json();
-  //   console.log("[DATA]:", data);
-  //   return {
-  //     status: 200,
-  //     message: "Successfully fetched the instagram page's posts",
-  //     data: data?.data
-  //   }
-  // } catch (err) {
-  //   console.log("[ERROR WHILE INSTAGRAM POSTS]:",err);
-  //   return {
-  //     status: 500,
-  //     message: "Couldn't get the instagram posts",
-  //     data: null
-  //   }
-  // }
   try {
     let allPosts = [];
     let nextPageUrl = `https://graph.facebook.com/v18.0/${process.env.META_INSTA_BUSINESS_ID}/media?fields=id,caption,timestamp&access_token=${process.env.META_ACCESS_TOKEN}`;
@@ -216,10 +252,10 @@ const getAllInstagramPostsService = async () => {
       const response = await fetch(nextPageUrl, { method: "GET" });
       const data = await response.json();
 
-      console.log("[DATA]:",data);
+      console.log("[DATA]:", data);
 
       if (data?.data?.length) {
-        allPosts.push(...data.data);  
+        allPosts.push(...data.data);
       }
 
       nextPageUrl = data?.paging?.next || null;
@@ -266,18 +302,14 @@ const updateAutoSocialEntitiesService = async (mediaIds, facebookPosts, listing_
     insightsResults.forEach(({ insights }) => {
       totalViews += insights.reach || 0;
       totalEngagements += (insights.likes || 0) + (insights.comments || 0) + (insights.saved || 0);
-      totalInterestedBuyers += insights.comments || 0; 
+      totalInterestedBuyers += insights.comments || 0;
     });
 
-
-
     facebookPosts.forEach(({ insights, comments }) => {
-      // console.log("[FB PARTICULAR POST INSIGHTS]:")
-
       totalViews += insights?.post_impressions || 0;
-      totalEngagements += (insights?.post_reactions_like_total || 0) + 
-                          (insights?.post_clicks || 0) +
-                          (comments?.summary?.total_count || 0);
+      totalEngagements += (insights?.post_reactions_like_total || 0) +
+        (insights?.post_clicks || 0) +
+        (comments?.summary?.total_count || 0);
       totalInterestedBuyers += comments?.summary?.total_count || 0;
     });
 
@@ -289,14 +321,14 @@ const updateAutoSocialEntitiesService = async (mediaIds, facebookPosts, listing_
     console.log("Total Interested Buyers:", totalInterestedBuyers);
 
 
-    const checkIfListingExists = await   Listing.findByPk(listing_id);
+    const checkIfListingExists = await Listing.findByPk(listing_id);
     console.log("[LISTING]:", checkIfListingExists);
 
     const updatedListingResult = await Listing.update({
       listing_engagements: totalEngagements,
       interested_buyers: totalInterestedBuyers,
-      views: checkIfListingExists.mlsViews + checkIfListingExists.zillowViews + checkIfListingExists.homesDotComViews  + totalViews
-    },{
+      views: checkIfListingExists.mlsViews + checkIfListingExists.zillowViews + checkIfListingExists.homesDotComViews + totalViews
+    }, {
       where: {
         listing_id: listing_id
       }
@@ -305,7 +337,7 @@ const updateAutoSocialEntitiesService = async (mediaIds, facebookPosts, listing_
     const finalUpdatedResult = await Listing.findByPk(listing_id);
     console.log("[UPDATED LISTING]:", finalUpdatedResult);
 
-    console.log("[UPDATED LISTING RESULT]:",updatedListingResult);
+    console.log("[UPDATED LISTING RESULT]:", updatedListingResult);
 
     return {
       status: 200,
@@ -342,95 +374,67 @@ const getPageAccessToken = async () => {
 
 const fetchPostInsights = async (postId, PAGE_ACCESS_TOKEN) => {
   try {
-      const metrics = ["post_impressions", "post_engaged_users", "post_reactions_like_total","post_clicks"];
-      let insights = {};
+    const metrics = ["post_impressions", "post_engaged_users", "post_reactions_like_total", "post_clicks"];
+    let insights = {};
 
-      for (const metric of metrics) {
-          const response = await fetch(`https://graph.facebook.com/v21.0/${postId}/insights?metric=${metric}&access_token=${PAGE_ACCESS_TOKEN}`, {
-              method: "GET"
-          });
-          const data = await response.json();
+    for (const metric of metrics) {
+      const response = await fetch(`https://graph.facebook.com/v21.0/${postId}/insights?metric=${metric}&access_token=${PAGE_ACCESS_TOKEN}`, {
+        method: "GET"
+      });
+      const data = await response.json();
 
-          if (data?.data?.length > 0) {
-              insights[metric] = data.data[0].values[0].value || 0;
-          }
+      if (data?.data?.length > 0) {
+        insights[metric] = data.data[0].values[0].value || 0;
       }
+    }
 
-      return insights;
+    return insights;
   } catch (err) {
-      console.log(`[ERROR FETCHING INSIGHTS FOR POST ${postId}]:`, err);
-      return {};
+    console.log(`[ERROR FETCHING INSIGHTS FOR POST ${postId}]:`, err);
+    return {};
   }
 };
 
-// const getFbPagePostsService = async () => {
-//   try {
-
-//     const result = await getPageAccessToken();
-//     const PAGE_ACCESS_TOKEN = result?.data[0]?.access_token;
-//     console.log("[PAGE ACCESS TOKEN GENERATE]:", result);
-
-//     const response = await fetch(`https://graph.facebook.com/v21.0/${process.env.META_PAGE_ID}/posts?fields=id,message,created_time,insights.metric(post_impressions_unique)&access_token=${PAGE_ACCESS_TOKEN}`, {
-//       method: "GET"
-//     });
-//     const data = await response.json();
-//     return {
-//       status: 200,
-//       message: "Successfully fetched all the posts on the page.",
-//       posts: data?.data
-//     }
-//   } catch (err) {
-//     console.log("[ERRR]:", err);
-//     return {
-//       status: 500,
-//       message: "Couldn't fetch all the posts."
-//     }
-//   }
-// }
-
 const getFbPagePostsService = async () => {
   try {
-      const result = await getPageAccessToken();
-      const PAGE_ACCESS_TOKEN = result?.data[0]?.access_token;
-      console.log("[PAGE ACCESS TOKEN GENERATED]:", PAGE_ACCESS_TOKEN);
+    const result = await getPageAccessToken();
+    const PAGE_ACCESS_TOKEN = result?.data[0]?.access_token;
+    console.log("[PAGE ACCESS TOKEN GENERATED]:", PAGE_ACCESS_TOKEN);
 
-      let allPosts = [];
-      let nextPageUrl = `https://graph.facebook.com/v21.0/${process.env.META_PAGE_ID}/posts?fields=id,message,created_time,comments.summary(true).limit(0),shares&access_token=${PAGE_ACCESS_TOKEN}`;
-      // let i = 0;
-      // Handle pagination
-      while (allPosts.length < 200) {
-          const postsResponse = await fetch(nextPageUrl, { method: "GET" });
-          const postsData = await postsResponse.json();
+    let allPosts = [];
+    let nextPageUrl = `https://graph.facebook.com/v21.0/${process.env.META_PAGE_ID}/posts?fields=id,message,created_time,comments.summary(true).limit(0),shares&access_token=${PAGE_ACCESS_TOKEN}`;
 
-          if (!postsData?.data) break; // Stop if no more data
+    while (allPosts.length < 200) {
+      const postsResponse = await fetch(nextPageUrl, { method: "GET" });
+      const postsData = await postsResponse.json();
 
-          // Fetch insights for each post
-          const postsWithInsights = await Promise.all(
-              postsData.data.map(async (post) => {
-                  const insights = await fetchPostInsights(post.id, PAGE_ACCESS_TOKEN);
-                  return { ...post, insights };
-              })
-          );
+      if (!postsData?.data) break;
 
-          allPosts.push(...postsWithInsights); // Add to the final array
+      const postsWithInsights = await Promise.all(
+        postsData.data.map(async (post) => {
+          const insights = await fetchPostInsights(post.id, PAGE_ACCESS_TOKEN);
+          return { ...post, insights };
+        })
+      );
 
-          // Move to the next page if available
-          nextPageUrl = postsData?.paging?.next || null;
-          console.log(`[FETCHED ${allPosts.length} POSTS SO FAR]`);
-      }
+      allPosts.push(...postsWithInsights);
 
-      return {
-          status: 200,
-          message: "Successfully fetched all posts with insights.",
-          posts: allPosts
-      };
+      nextPageUrl = postsData?.paging?.next || null;
+      console.log(`[FETCHED ${allPosts.length} POSTS SO FAR]`);
+    }
+
+    return {
+      status: 200,
+      message: "Successfully fetched all posts with insights.",
+      posts: allPosts
+    };
   } catch (err) {
-      console.log("[ERROR FETCHING FACEBOOK POSTS]:", err);
-      return {
-          status: 500,
-          message: "Couldn't fetch Facebook posts.",
-          posts: []
-      };
+    console.log("[ERROR FETCHING FACEBOOK POSTS]:", err);
+    return {
+      status: 500,
+      message: "Couldn't fetch Facebook posts.",
+      posts: []
+    };
   }
 };
 
@@ -442,5 +446,6 @@ module.exports = {
   getAllListingsService,
   getAllInstagramPostsService,
   updateAutoSocialEntitiesService,
-  getFbPagePostsService
+  getFbPagePostsService,
+  uploadBrochureVideoService
 };

@@ -333,7 +333,148 @@ const getFbPagePosts = async (request, response) => {
         })
     }
 }
-// const 
+
+const updateBrochureImages = async (request, response) => {
+    let listing_id;
+    let imagesText = [];
+    try {
+        const parts = request.parts();
+        const uploadedUrls = [];
+
+        for await (const part of parts) {
+            if (part.file) {
+                const tempDir = path.join(__dirname, "uploads");
+                if (!fs.existsSync(tempDir)) fs.mkdirSync(tempDir);
+
+                const tempFilePath = path.join(tempDir, part.filename);
+                const writeStream = fs.createWriteStream(tempFilePath);
+
+                await new Promise((resolve, reject) => {
+                    part.file.pipe(writeStream);
+                    part.file.on("end", resolve);
+                    part.file.on("error", reject);
+                });
+
+                const uploadResult = await uploadImage(tempFilePath);
+
+                if (uploadResult.success) {
+                    uploadedUrls.push(uploadResult.url);
+                } else {
+                    console.error("[UPLOAD FAILED]:", uploadResult.error);
+                }
+                fs.unlinkSync(tempFilePath);
+            } else if (part.fieldname === "listing_id") {
+                listing_id = part.value;
+            } else if (part.fieldname === "imagesText") {
+                console.log("[PART]:",part);
+                console.log("[PART VALUE]:",part?.value);
+                try {
+                    imagesText = JSON.parse(part.value);
+                } catch (parseErr) {
+                    console.error("[JSON PARSE ERROR]:", parseErr);
+                }
+            }
+        }
+
+        if (uploadedUrls.length > 0 && imagesText.length === uploadedUrls.length) {
+            const brochureData = {
+                images: uploadedUrls,
+                imagesText: imagesText
+            };
+
+            const updateListing = await Listing.update({
+                brochure: brochureData
+            }, {
+                where: {
+                    listing_id: listing_id
+                }
+            });
+
+            console.log("[updated listing result]:", updateListing);
+            response.status(200).send({
+                status: 200,
+                message: "Uploaded all the images to cloudinary and updated brochure information.",
+                data: updateListing
+            });
+        } else {
+            response.status(500).send({
+                status: 500,
+                message: "Couldn't upload the images or mismatch in images and texts, please check the server logs.",
+                data: null
+            });
+        }
+    } catch (err) {
+        console.log("[ERROR]:", err);
+        response.status(500).send({
+            status: 500,
+            message: "Some problem occurred while uploading the brochure images."
+        });
+    }
+};
+
+const handleUploadBrochureVideo = async (request, response) => {
+    try {
+        let tempFilePath = null;
+    try {
+        const parts = request.parts();
+        let listing_id = null;
+
+        for await (const part of parts) {
+            if (part.file) {
+                const tempDir = path.join(__dirname, "uploads");
+                if (!fs.existsSync(tempDir)) {
+                    fs.mkdirSync(tempDir);
+                }
+                tempFilePath = path.join(tempDir, part.filename);
+
+                const writeStream = fs.createWriteStream(tempFilePath);
+                await new Promise((resolve, reject) => {
+                    part.file.pipe(writeStream);
+                    part.file.on("end", resolve);
+                    part.file.on("error", reject);
+                });
+
+                console.log("[SUCCESSFULLY UPLOADED FILE TO BACKEND FOLDER]:", tempFilePath);
+            } else if (part.fieldname === "listing_id") {
+                listing_id = part.value;
+                console.log("[LISTING ID]:", listing_id);
+            }
+        }
+
+        if (!listing_id || !tempFilePath) {
+            return response.status(400).send({
+                status: 400,
+                message: "Missing listing_id or file in the request.",
+                listing: null
+            });
+        } else {
+            const resultFromCloudinaryAndDb = await services.uploadBrochureVideoService(tempFilePath, listing_id);
+            return response.status(200).send({
+                status: resultFromCloudinaryAndDb.status,
+                message: resultFromCloudinaryAndDb.message,
+                listing: resultFromCloudinaryAndDb.result
+            })
+        }
+    } catch (err) {
+        console.log("[ERROR]:", err);
+        request.status(500).send({
+            status: 500,
+            message: "Some interruption occurred while uploading the video",
+            result: null
+        })
+    } finally {
+        fs.unlinkSync(tempFilePath);
+        console.log("[SUCCESSFULLY DELETED TEMPORARY FILE]");
+    }
+    } catch (err) {
+        console.log("[ERROR]:",err);
+        response.status(500).send({
+            status: 500,
+            message: "Some problem occured while uploading the brochure images."
+        })
+    }
+}
+// const dummy =
 
 module.exports = {
     handleFirstVideoUpload,
@@ -345,8 +486,8 @@ module.exports = {
     getAllListings,
     getAllInstagramPosts,
     updateAutoSocialEntities,
-    getFbPagePosts
+    getFbPagePosts,
+    updateBrochureImages,
+    handleUploadBrochureVideo
 }
 
-
-// https://graph.facebook.com/v21.0/261586003895564/posts?fields=id,message,created_time,insights.metric(post_impressions_unique)&access_token=EAATS2AmQq28BO4XnhqqcCFS51NACHMlDroVap3QV8bCvN5ZAOnd1aT5ayZCfBrkZC4IlO9O3nC7fZBQs6BlZCkwQQ3TQSYmnZCcBroa2ZA6ZBAGncOZBZBVMggOpJZBvz7DYuhbzjgInR5DavdYFqxtcmzX1xNFz6I0q1kmdjuleJTEvc5Guo9XEHBWTWbf40uqnha4ndc83GGThnexlMrbbIRE

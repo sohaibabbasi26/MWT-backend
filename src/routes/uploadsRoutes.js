@@ -62,6 +62,16 @@ const routes = [
         method: "GET",
         url: "/get-all-facebook-posts",
         handler: uploadsHandlers.getFbPagePosts
+    },
+    {
+        method: "PUT",
+        url: "/upload-brochure-images",
+        handler: uploadsHandlers.updateBrochureImages
+    },
+    {
+        method: "PUT",
+        url: "/upload-brochure-video",
+        handler: uploadsHandlers.handleUploadBrochureVideo
     }
     // {
     //     method: "PUT",

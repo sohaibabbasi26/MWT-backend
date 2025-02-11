@@ -69,10 +69,9 @@ const Listing = sequelize.define('listings', {
     uploaded_images: {
         type: DataTypes.JSONB
     },
-    // page_link: {
-    //     type: DataTypes.STRING,
-    //     defaultValue: null
-    // }
+    brochure: {
+        type: DataTypes.JSONB
+    }
 });
 
 module.exports = Listing;
