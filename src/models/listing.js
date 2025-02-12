@@ -70,7 +70,8 @@ const Listing = sequelize.define('listings', {
         type: DataTypes.JSONB
     },
     brochure: {
-        type: DataTypes.JSONB
+        type: DataTypes.TEXT,
+        defaultValue: null
     }
 });
 
