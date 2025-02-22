@@ -2,6 +2,9 @@ const { uploadVideo } = require("../utilities/cloudinaryHelper");
 const Listing = require("../models/listing");
 const { getInsights } = require("../utilities/getPostInsights");
 const { where } = require("sequelize");
+const Subscriptions = require("../models/subscriptions");
+const InstantAccess = require("../models/InstantAccess");
+
 
 const uploadFirstVideoService = async (filePath, listing_id) => {
   try {
@@ -438,6 +441,119 @@ const getFbPagePostsService = async () => {
   }
 };
 
+const createSubscriptionService = async (email) => {
+  try {
+    const checkIfAlreadySubscribed = await Subscriptions.findOne({
+      where: {
+        email: email
+      }
+    });
+
+    console.log("[check]:",checkIfAlreadySubscribed);
+
+    if (checkIfAlreadySubscribed) {
+      return {
+        status: 409,
+        message: "Already subscribed",
+        result: null
+      }
+    } else {
+      const result = await Subscriptions.create({
+        email: email
+      });
+      return {
+        status: 200,
+        message: "Successfully made a subscription",
+        result: result
+      }
+    }
+    
+  } catch (err) {
+    console.log("[error]:", err);
+    return {
+      status: 500,
+      message: "Couldn't subscribe due to some issue.",
+      result: null
+    }
+  }
+}
+
+const createGetInstantAccess = async (body) => {
+  try {
+    const nBody = JSON.parse(body);
+    console.log("[body data in service]:",body);
+    console.log("[body email]:", nBody);
+    const checkIfAlreadySubscribed = await InstantAccess.findOne({
+      where: {
+        email: nBody?.email
+      }
+    });
+
+    
+
+    console.log("[check]:",checkIfAlreadySubscribed);
+
+    if (checkIfAlreadySubscribed) {
+      return {
+        status: 409,
+        message: "Already subscribed",
+        result: null
+      }
+    } else {
+      const result = await InstantAccess.create(nBody);
+      return {
+        status: 200,
+        message: "Successfully made a instant access",
+        result: result
+      }
+    }
+    
+  } catch (err) {
+    console.log("[error]:", err);
+    return {
+      status: 500,
+      message: "Couldn't subscribe due to some issue.",
+      result: null
+    }
+  }
+}
+
+const fetchAllInstantAccessService = async () => {
+  try {
+    const querySubscribers = await InstantAccess.findAll();
+    return {
+      status: 200,
+      message: "Successfully fetched all the instant access subscribers.",
+      data: querySubscribers
+    }
+  } catch (err) {
+    console.log("[ERROR]:",err);
+    return {
+      status: 500,
+      message: "Failed to fetch",
+      data: null
+    }
+  }
+}
+
+const fetchAllSubscribersService = async () => {
+  try {
+    const querySubscribers = await Subscriptions.findAll();
+    return {
+      status: 200,
+      message: "Successfully fetched all the subscribers.",
+      data: querySubscribers
+    }
+  } catch (err) {
+    console.log("[ERROR]:",err);
+    return {
+      status: 500,
+      message: "Failed to fetch",
+      data: null
+    }
+  }
+}
+
 module.exports = {
   uploadFirstVideoService,
   updateListingService,
@@ -447,5 +563,9 @@ module.exports = {
   getAllInstagramPostsService,
   updateAutoSocialEntitiesService,
   getFbPagePostsService,
-  uploadBrochureVideoService
+  uploadBrochureVideoService,
+  createSubscriptionService,
+  fetchAllSubscribersService,
+  createGetInstantAccess,
+  fetchAllInstantAccessService
 };

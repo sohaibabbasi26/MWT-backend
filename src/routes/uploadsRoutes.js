@@ -72,12 +72,27 @@ const routes = [
         method: "PUT",
         url: "/upload-brochure-video",
         handler: uploadsHandlers.handleUploadBrochureVideo
-    }
-    // {
-    //     method: "PUT",
-    //     url: "/edit-listing/:listing_id",
-    //     handler: uploadsHandlers
-    // }
+    },
+    {
+        method: "POST",
+        url: "/subscribe",
+        handler: uploadsHandlers.createSubscriptionHandler
+    },
+    {
+        method: "GET",
+        url: "/fetch-all-subscribers",
+        handler: uploadsHandlers.fetchAllSubscribersHandler
+    },
+    {
+        method: "POST",
+        url: "/subscribe-to-instant-access",
+        handler: uploadsHandlers.createInstantAccessSubscriptionHandler
+    },
+    {
+        method: "GET",
+        url: "/fetch-instant-access-subscribers",
+        handler: uploadsHandlers.fetchAllInsantAccessSubscribersHandler
+    },
 ];
 
 module.exports = {routes};

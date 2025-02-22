@@ -474,7 +474,82 @@ const handleUploadBrochureVideo = async (request, response) => {
         })
     }
 }
+
+const createSubscriptionHandler = async (request, response) => {
+    try {
+        const { email } = request?.body;
+        const result = await services.createSubscriptionService(email);
+        response.status(500).send({
+            status: result?.status,
+            message: result?.message,
+            data: result?.result
+        })
+    } catch (err) {
+        console.log("[ERROR]:",err);
+        response.status(500).send({
+            status: 500,
+            message: "Couldn't subscribe due to some issue.",
+            result: null
+        })
+    }
+}
+
+const createInstantAccessSubscriptionHandler = async (request, response) => {
+    try {
+        const body = request?.body;
+        console.log("[body data]:",body);
+        const result = await services.createGetInstantAccess(body);
+        response.status(500).send({
+            status: result?.status,
+            message: result?.message,
+            data: result?.result
+        })
+    } catch (err) {
+        console.log("[ERROR]:",err);
+        response.status(500).send({
+            status: 500,
+            message: "Couldn't subscribe due to some issue.",
+            result: null
+        })
+    }
+}
 // const dummy =
+
+const fetchAllSubscribersHandler = async (request, response) => {
+    try {
+        const result = await services.fetchAllSubscribersService();
+        response.status(result?.status).send({
+            status: result?.status,
+            message: result?.message,
+            data: result?.data
+        })
+    } catch (err) {
+        console.log("[ERROR]:",err);
+        response.status(500).send({
+            status: 500,
+            message: "Failed to fetch",
+            data: null
+        })
+    }
+}
+
+const fetchAllInsantAccessSubscribersHandler = async (request, response) => {
+    try {
+        const result = await services.fetchAllInstantAccessService();
+        response.status(result?.status).send({
+            status: result?.status,
+            message: result?.message,
+            data: result?.data
+        })
+    } catch (err) {
+        console.log("[ERROR]:",err);
+        response.status(500).send({
+            status: 500,
+            message: "Failed to fetch",
+            data: null
+        })
+    }
+}
 
 module.exports = {
     handleFirstVideoUpload,
@@ -488,6 +563,10 @@ module.exports = {
     updateAutoSocialEntities,
     getFbPagePosts,
     updateBrochureImages,
-    handleUploadBrochureVideo
+    handleUploadBrochureVideo,
+    createSubscriptionHandler,
+    fetchAllSubscribersHandler,
+    createInstantAccessSubscriptionHandler,
+    fetchAllInsantAccessSubscribersHandler
 }
 
