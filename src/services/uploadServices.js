@@ -454,7 +454,7 @@ const createSubscriptionService = async (email) => {
     if (checkIfAlreadySubscribed) {
       return {
         status: 409,
-        message: "Already subscribed",
+        message: "You have already subscribed.",
         result: null
       }
     } else {
@@ -463,7 +463,7 @@ const createSubscriptionService = async (email) => {
       });
       return {
         status: 200,
-        message: "Successfully made a subscription",
+        message: "Successfully subscribed.",
         result: result
       }
     }
@@ -488,8 +488,6 @@ const createGetInstantAccess = async (body) => {
         email: nBody?.email
       }
     });
-
-    
 
     console.log("[check]:",checkIfAlreadySubscribed);
 

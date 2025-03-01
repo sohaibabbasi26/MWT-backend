@@ -479,7 +479,7 @@ const createSubscriptionHandler = async (request, response) => {
     try {
         const { email } = request?.body;
         const result = await services.createSubscriptionService(email);
-        response.status(500).send({
+        response.status(result?.status).send({
             status: result?.status,
             message: result?.message,
             data: result?.result
