@@ -551,6 +551,63 @@ const fetchAllInsantAccessSubscribersHandler = async (request, response) => {
     }
 }
 
+const deleteListingsHandler = async (request, response) => {
+    try {
+        const {listing_ids} = request.body;
+        const result = await services.deleteListingService(listing_ids);
+        response.status(result?.status).send({
+            status: result?.status,
+            message: result?.message,
+            result: result?.result  
+        })
+    } catch (err) {
+        console.log("[ERR]:",err);
+        response.status(500).send({
+            status: 500,
+            message: "Couldn't delete the listings.",
+            result: null
+        })
+    }
+}
+
+const deleteSubscriptionsHandler = async (request, response) => {
+    try {
+        const {subscriber_ids} = request.body;
+        const result = await services.removeSubscribersService(subscriber_ids);
+        response.status(result?.status).send({
+            status: result?.status,
+            message: result?.message,
+            result: result?.result  
+        })
+    } catch (err) {
+        console.log("[ERR]:",err);
+        response.status(500).send({
+            status: 500,
+            message: "Couldn't delete the subscriptions.",
+            result: null
+        })
+    }
+}
+
+const deleteInstantSubscriptionsHandler = async (request, response) => {
+    try {
+        const {subscriber_ids} = request.body;
+        const result = await services.removeInstantSubscribersService(subscriber_ids);
+        response.status(result?.status).send({
+            status: result?.status,
+            message: result?.message,
+            result: result?.result  
+        })
+    } catch (err) {
+        console.log("[ERR]:",err);
+        response.status(500).send({
+            status: 500,
+            message: "Couldn't delete the subscriptions.",
+            result: null
+        })
+    }
+}
+
 module.exports = {
     handleFirstVideoUpload,
     createListingHandler,
@@ -567,6 +624,9 @@ module.exports = {
     createSubscriptionHandler,
     fetchAllSubscribersHandler,
     createInstantAccessSubscriptionHandler,
-    fetchAllInsantAccessSubscribersHandler
+    fetchAllInsantAccessSubscribersHandler,
+    deleteListingsHandler,
+    deleteSubscriptionsHandler,
+    deleteInstantSubscriptionsHandler
 }
 

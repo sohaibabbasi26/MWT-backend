@@ -93,6 +93,21 @@ const routes = [
         url: "/fetch-instant-access-subscribers",
         handler: uploadsHandlers.fetchAllInsantAccessSubscribersHandler
     },
+    {
+        method: "DELETE",
+        url: "/delete-listings",
+        handler: uploadsHandlers.deleteListingsHandler
+    },
+    {
+        method: "DELETE",
+        url: "/delete-subscriptions",
+        handler: uploadsHandlers.deleteSubscriptionsHandler
+    },
+    {
+        method: "DELETE",
+        url: "/delete-instant-subscribers",
+        handler: uploadsHandlers.deleteInstantSubscriptionsHandler
+    },
 ];
 
 module.exports = {routes};

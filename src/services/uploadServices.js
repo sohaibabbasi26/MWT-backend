@@ -1,7 +1,7 @@
 const { uploadVideo } = require("../utilities/cloudinaryHelper");
 const Listing = require("../models/listing");
 const { getInsights } = require("../utilities/getPostInsights");
-const { where } = require("sequelize");
+const { where, Op } = require("sequelize");
 const Subscriptions = require("../models/subscriptions");
 const InstantAccess = require("../models/InstantAccess");
 
@@ -449,7 +449,7 @@ const createSubscriptionService = async (email) => {
       }
     });
 
-    console.log("[check]:",checkIfAlreadySubscribed);
+    console.log("[check]:", checkIfAlreadySubscribed);
 
     if (checkIfAlreadySubscribed) {
       return {
@@ -467,7 +467,7 @@ const createSubscriptionService = async (email) => {
         result: result
       }
     }
-    
+
   } catch (err) {
     console.log("[error]:", err);
     return {
@@ -481,7 +481,7 @@ const createSubscriptionService = async (email) => {
 const createGetInstantAccess = async (body) => {
   try {
     const nBody = JSON.parse(body);
-    console.log("[body data in service]:",body);
+    console.log("[body data in service]:", body);
     console.log("[body email]:", nBody);
     const checkIfAlreadySubscribed = await InstantAccess.findOne({
       where: {
@@ -489,7 +489,7 @@ const createGetInstantAccess = async (body) => {
       }
     });
 
-    console.log("[check]:",checkIfAlreadySubscribed);
+    console.log("[check]:", checkIfAlreadySubscribed);
 
     if (checkIfAlreadySubscribed) {
       return {
@@ -505,7 +505,7 @@ const createGetInstantAccess = async (body) => {
         result: result
       }
     }
-    
+
   } catch (err) {
     console.log("[error]:", err);
     return {
@@ -525,7 +525,7 @@ const fetchAllInstantAccessService = async () => {
       data: querySubscribers
     }
   } catch (err) {
-    console.log("[ERROR]:",err);
+    console.log("[ERROR]:", err);
     return {
       status: 500,
       message: "Failed to fetch",
@@ -543,7 +543,7 @@ const fetchAllSubscribersService = async () => {
       data: querySubscribers
     }
   } catch (err) {
-    console.log("[ERROR]:",err);
+    console.log("[ERROR]:", err);
     return {
       status: 500,
       message: "Failed to fetch",
@@ -551,6 +551,139 @@ const fetchAllSubscribersService = async () => {
     }
   }
 }
+
+const deleteListingService = async (listingIds) => {
+  try {
+    if (!Array.isArray(listingIds) || listingIds.length === 0) {
+      return {
+        status: 400,
+        message: "No valid listing IDs provided.",
+        result: null
+      };
+    }
+
+    console.log("[Listing IDs]:", listingIds);
+
+    const result = await Listing.destroy({
+      where: {
+        listing_id: {
+          [Op.in]: listingIds
+        }
+      }
+    });
+
+
+    if (result === 0) {
+      return {
+        status: 404,
+        message: "No listings found with the provided listing IDs.",
+        result: null
+      };
+    }
+
+    return {
+      status: 200,
+      message: "Successfully deleted the selected listings.",
+      result: result
+    };
+  } catch (err) {
+    console.log("[ERROR]:", err);
+    return {
+      status: 500,
+      message: "Couldn't delete the listings.",
+      result: null
+    };
+  }
+};
+
+const removeSubscribersService = async (subscriberIds) => {
+  try {
+    console.log("[subscriber ids]:",subscriberIds);
+    if (!Array.isArray(subscriberIds) || subscriberIds.length === 0) {
+      return {
+        status: 400,
+        message: "No valid subscription IDs provided.",
+        result: null
+      };
+    }
+
+    console.log("[subscriberIds]:", subscriberIds);
+
+    const result = await Subscriptions.destroy({
+      where: {
+        subscription_id: {
+          [Op.in]: subscriberIds
+        }
+      }
+    });
+
+    if (result === 0) {
+      return {
+        status: 404,
+        message: "No subscriptions found with the provided subscription IDs.",
+        result: null
+      };
+    }
+
+    return {
+      status: 200,
+      message: "Successfully deleted the selected subscriptions.",
+      result: result
+    };
+  } catch (err) {
+    console.log("[ERROR]:", err);
+    return {
+      status: 500,
+      message: "Couldn't delete the subscriptions.",
+      result: null
+    };
+  }
+};
+
+
+const removeInstantSubscribersService = async (subscriberIds) => {
+  try {
+    console.log("[subscriber ids]:",subscriberIds);
+    if (!Array.isArray(subscriberIds) || subscriberIds.length === 0) {
+      return {
+        status: 400,
+        message: "No valid subscription IDs provided.",
+        result: null
+      };
+    }
+
+    console.log("[subscriberIds]:", subscriberIds);
+
+    const result = await InstantAccess.destroy({
+      where: {
+        access_id: {
+          [Op.in]: subscriberIds
+        }
+      }
+    });
+
+    if (result === 0) {
+      return {
+        status: 404,
+        message: "No subscriptions found with the provided subscription IDs.",
+        result: null
+      };
+    }
+
+    return {
+      status: 200,
+      message: "Successfully deleted the selected subscriptions.",
+      result: result
+    };
+  } catch (err) {
+    console.log("[ERROR]:", err);
+    return {
+      status: 500,
+      message: "Couldn't delete the subscriptions.",
+      result: null
+    };
+  }
+};
 
 module.exports = {
   uploadFirstVideoService,
@@ -565,5 +698,8 @@ module.exports = {
   createSubscriptionService,
   fetchAllSubscribersService,
   createGetInstantAccess,
-  fetchAllInstantAccessService
+  fetchAllInstantAccessService,
+  deleteListingService,
+  removeSubscribersService,
+  removeInstantSubscribersService 
 };
