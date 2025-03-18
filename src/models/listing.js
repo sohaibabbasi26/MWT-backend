@@ -24,6 +24,26 @@ const Listing = sequelize.define('listings', {
         type: DataTypes.INTEGER,
         allowNull: true
     },
+    visitZillowLink: {
+        type: DataTypes.STRING,
+        allowNull: true
+    },
+    additionalPages: {
+        type: DataTypes.JSONB,
+        allowNull: true
+    },
+    graphSectionEmbeddedLink: {
+        type: DataTypes.STRING,
+        allowNull: true
+    },
+    zillowGraphSectionEmbeddedLink: {
+        type: DataTypes.STRING,
+        allowNull: true
+    },
+    brightMLSgraphSectionEmbeddedLink: {
+        type: DataTypes.STRING,
+        allowNull: true
+    },
     mlsViews: {
         type: DataTypes.INTEGER,
         allowNull: true
